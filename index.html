@@ -23,47 +23,136 @@
     ::-webkit-scrollbar { display: none; }
 
     /* ── Layout ─────────────────────────────────────── */
-    #app { max-width: 600px; margin: 0 auto; min-height: 100vh; position: relative; }
+    #app { min-height: 100vh; position: relative; }
 
-    /* ── Header ─────────────────────────────────────── */
-    #header {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(6,11,20,0.92);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid #111f30;
-      padding: env(safe-area-inset-top, 0) 0 0;
-    }
-    .header-inner { padding: 14px 16px 0; }
-    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .app-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
-    .app-subtitle { font-size: 11px; color: #2d3f55; font-variant-numeric: tabular-nums; margin-top: 2px; }
-    #search-input {
-      width: 100%; background: #111f30; border: 1px solid #1e293b;
-      border-radius: 12px; padding: 11px 14px; color: #f1f5f9;
-      font-size: 15px; margin-bottom: 0;
-    }
-    #search-input::placeholder { color: #2d3f55; }
-    #add-btn {
-      background: #4ade80; color: #000; border-radius: 14px;
-      width: 44px; height: 44px; font-size: 26px; font-weight: 900;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    #add-btn:active { opacity: 0.75; }
+    /* ── DESKTOP sidebar layout ──────────────────────── */
+    @media (min-width: 900px) {
+      ::-webkit-scrollbar { display: block; width: 6px; }
+      ::-webkit-scrollbar-track { background: #0a1628; }
+      ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 99px; }
 
-    /* ── Tab bar ─────────────────────────────────────── */
-    #tabs {
-      display: flex; overflow-x: auto; scrollbar-width: none;
-      padding: 8px 10px 0;
+      body { display: flex; }
+      #app { display: flex; flex-direction: row; width: 100%; }
+
+      /* Left sidebar */
+      #sidebar {
+        width: 260px; flex-shrink: 0; height: 100vh; position: sticky; top: 0;
+        background: #080f1c; border-right: 1px solid #111f30;
+        display: flex; flex-direction: column; padding: 32px 20px 24px;
+        overflow-y: auto;
+      }
+      .sidebar-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
+      .sidebar-subtitle { font-size: 11px; color: #2d3f55; margin-bottom: 28px; }
+      #search-input {
+        width: 100%; background: #111f30; border: 1px solid #1e293b;
+        border-radius: 12px; padding: 10px 13px; color: #f1f5f9;
+        font-size: 14px; margin-bottom: 20px;
+      }
+      #search-input::placeholder { color: #2d3f55; }
+      #tabs { flex-direction: column; gap: 2px; padding: 0; overflow-x: unset; }
+      .tab-btn {
+        border-bottom: none; border-radius: 10px; padding: 10px 12px;
+        font-size: 13px; justify-content: space-between; width: 100%;
+      }
+      .tab-btn.active { background: rgba(255,255,255,0.05); }
+      .sidebar-add-btn {
+        margin-top: auto; padding-top: 24px;
+        display: block;
+      }
+      #add-btn {
+        width: 100%; height: 44px; border-radius: 12px; font-size: 15px;
+        font-weight: 700; background: #4ade80; color: #000;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+      }
+      #add-btn::after { content: 'Add Show'; }
+
+      /* Main content area */
+      #main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+      #header { display: none; } /* hide mobile header */
+      #list-container { padding: 32px 32px 60px; }
+      #api-notice { margin: 0 32px 20px; }
+
+      /* Desktop: poster-card grid */
+      #cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 20px;
+      }
+      .show-card {
+        flex-direction: column; min-height: unset; border-left: none;
+        border-top: 3px solid var(--status-color); border-radius: 14px;
+        margin-bottom: 0;
+      }
+      .show-card:hover { background: #1a2540; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+      .drag-handle { display: none; }
+      .card-poster { width: 100%; height: 220px; }
+      .card-poster img { width: 100%; height: 100%; object-fit: cover; }
+      .card-body { padding: 12px 12px 10px; }
+      .card-rating { padding: 0 12px 12px; justify-content: flex-start; }
+      .card-title { font-size: 14px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+      /* Desktop sheet: centered modal instead of bottom sheet */
+      .sheet-backdrop { align-items: center; justify-content: center; }
+      .sheet {
+        border-radius: 20px; max-width: 560px; width: 90%;
+        max-height: 85vh; transform: scale(0.95); transition: transform 0.25s cubic-bezier(.32,1,.67,1), opacity 0.25s;
+        opacity: 0;
+      }
+      .sheet-backdrop.open .sheet { transform: scale(1); opacity: 1; }
+      .sheet-handle { display: none; }
+      .detail-banner { border-radius: 20px 20px 0 0; }
+
+      /* Desktop: wider search results grid */
+      .search-results { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 18px 32px; }
+
+      .drag-hint { display: none; }
+      .desktop-section-title {
+        font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
+        margin-bottom: 20px; color: #f1f5f9;
+      }
     }
-    .tab-btn {
-      background: transparent; color: #3d5166;
-      border-bottom: 2px solid transparent;
-      padding: 8px 12px 10px; font-size: 13px; font-weight: 700;
-      white-space: nowrap; flex-shrink: 0; transition: color 0.18s;
-      display: flex; align-items: center; gap: 5px;
+
+    /* ── MOBILE layout ───────────────────────────────── */
+    @media (max-width: 899px) {
+      #sidebar { display: none; }
+      #main-content { display: contents; }
+      #cards-grid { display: flex; flex-direction: column; }
+      .desktop-section-title { display: none; }
+
+      /* ── Header ──────────────────────────── */
+      #header {
+        position: sticky; top: 0; z-index: 100;
+        background: rgba(6,11,20,0.92);
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid #111f30;
+        padding: env(safe-area-inset-top, 0) 0 0;
+      }
+      .header-inner { padding: 14px 16px 0; }
+      .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+      .app-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+      .app-subtitle { font-size: 11px; color: #2d3f55; font-variant-numeric: tabular-nums; margin-top: 2px; }
+      #search-input {
+        width: 100%; background: #111f30; border: 1px solid #1e293b;
+        border-radius: 12px; padding: 11px 14px; color: #f1f5f9; font-size: 15px;
+      }
+      #search-input::placeholder { color: #2d3f55; }
+      #add-btn {
+        background: #4ade80; color: #000; border-radius: 14px;
+        width: 44px; height: 44px; font-size: 26px; font-weight: 900;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      }
+      #add-btn:active { opacity: 0.75; }
+      #tabs { display: flex; overflow-x: auto; scrollbar-width: none; padding: 8px 10px 0; }
+      .tab-btn {
+        background: transparent; color: #3d5166; border-bottom: 2px solid transparent;
+        padding: 8px 12px 10px; font-size: 13px; font-weight: 700;
+        white-space: nowrap; flex-shrink: 0; transition: color 0.18s;
+        display: flex; align-items: center; gap: 5px;
+      }
+      .tab-btn.active { border-bottom-color: var(--tab-color); color: var(--tab-color); }
+      #list-container { padding: 14px 16px 120px; }
     }
-    .tab-btn.active { border-bottom-color: var(--tab-color); color: var(--tab-color); }
+
     .tab-count {
       font-size: 10px; font-variant-numeric: tabular-nums;
       background: #111f30; color: #3d5166;
@@ -72,8 +161,7 @@
     }
     .tab-btn.active .tab-count { background: rgba(255,255,255,0.08); color: var(--tab-color); }
 
-    /* ── List ────────────────────────────────────────── */
-    #list-container { padding: 14px 16px 120px; }
+    /* ── Drag hint (mobile only) ─────────────────────── */
     .drag-hint { font-size: 10px; color: #1e293b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
 
     /* ── Show card ───────────────────────────────────── */
@@ -229,28 +317,45 @@
 </head>
 <body>
 <div id="app">
-  <div id="header">
-    <div class="header-inner">
-      <div class="header-row">
-        <div>
-          <div class="app-title">📺 Watchlist</div>
-          <div class="app-subtitle" id="subtitle">0 watching · 0 total</div>
-        </div>
-        <button id="add-btn">+</button>
-      </div>
-      <input type="search" id="search-input" placeholder="🔍  Search your shows…"/>
-    </div>
+
+  <!-- DESKTOP SIDEBAR -->
+  <div id="sidebar">
+    <div class="sidebar-title">📺 Watchlist</div>
+    <div class="sidebar-subtitle" id="sidebar-subtitle">0 watching · 0 total</div>
+    <input type="search" id="search-input" placeholder="🔍  Search your shows…"/>
     <div id="tabs"></div>
+    <div class="sidebar-add-btn">
+      <button id="add-btn"></button>
+    </div>
   </div>
 
-  <div id="api-notice" style="display:none">
-    ⚠️ Add your free TMDB API key to enable search.<br>
-    Get one free at <a href="https://www.themoviedb.org/settings/api" target="_blank">themoviedb.org</a> → Settings → API
-    <br><input type="text" id="api-key-input" placeholder="Paste your API key here…"/>
-    <br><button onclick="saveApiKey()">Save Key</button>
-  </div>
+  <!-- MAIN CONTENT (mobile header + list) -->
+  <div id="main-content">
 
-  <div id="list-container"></div>
+    <!-- Mobile header -->
+    <div id="header">
+      <div class="header-inner">
+        <div class="header-row">
+          <div>
+            <div class="app-title">📺 Watchlist</div>
+            <div class="app-subtitle" id="subtitle">0 watching · 0 total</div>
+          </div>
+          <button id="add-btn-mobile" onclick="document.getElementById('add-btn').click()" style="background:#4ade80;color:#000;border-radius:14px;width:44px;height:44px;font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>
+        </div>
+        <input type="search" id="search-input-mobile" placeholder="🔍  Search your shows…" oninput="document.getElementById('search-input').value=this.value;filterTerm=this.value.toLowerCase();render();" style="width:100%;background:#111f30;border:1px solid #1e293b;border-radius:12px;padding:11px 14px;color:#f1f5f9;font-size:15px;margin-bottom:0;"/>
+      </div>
+      <div id="tabs-mobile"></div>
+    </div>
+
+    <div id="api-notice" style="display:none">
+      ⚠️ Add your free TMDB API key to enable search.<br>
+      Get one free at <a href="https://www.themoviedb.org/settings/api" target="_blank">themoviedb.org</a> → Settings → API
+      <br><input type="text" id="api-key-input" placeholder="Paste your API key here…"/>
+      <br><button onclick="saveApiKey()">Save Key</button>
+    </div>
+
+    <div id="list-container"></div>
+  </div>
 </div>
 
 <!-- Search sheet -->
@@ -361,67 +466,88 @@ function posterHTML(path, title, w=64) {
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
+const isDesktop = () => window.innerWidth >= 900;
+
+function renderTabsHTML(activeKey) {
+  return TABS.map(tab => {
+    const count = shows.filter(s=>s.status===tab.key).length;
+    const active = activeKey === tab.key ? 'active' : '';
+    return `<button class="tab-btn ${active}" style="--tab-color:${tab.color}" onclick="setTab('${tab.key}')">
+      <span>${tab.icon} ${tab.label}</span>
+      ${count>0 ? `<span class="tab-count">${count}</span>` : ''}
+    </button>`;
+  }).join('');
+}
+
 function render() {
-  // subtitle
   const watching = shows.filter(s=>s.status==='watching').length;
-  document.getElementById('subtitle').textContent = `${watching} watching · ${shows.length} total`;
+  const subtitleText = `${watching} watching · ${shows.length} total`;
+
+  // Update both subtitle elements
+  const sub = document.getElementById('subtitle');
+  const subsid = document.getElementById('sidebar-subtitle');
+  if (sub) sub.textContent = subtitleText;
+  if (subsid) subsid.textContent = subtitleText;
 
   // api notice
   const needsKey = TMDB_KEY === 'YOUR_TMDB_API_KEY_HERE';
   document.getElementById('api-notice').style.display = needsKey ? 'block' : 'none';
 
-  // tabs
-  const tabsEl = document.getElementById('tabs');
-  tabsEl.innerHTML = TABS.map(tab => {
-    const count = shows.filter(s=>s.status===tab.key).length;
-    const active = activeTab === tab.key ? 'active' : '';
-    return `<button class="tab-btn ${active}" style="--tab-color:${tab.color}" onclick="setTab('${tab.key}')">
-      ${tab.icon} ${tab.label}
-      ${count>0 ? `<span class="tab-count">${count}</span>` : ''}
-    </button>`;
-  }).join('');
+  // Render tabs in both sidebar + mobile tab bar
+  const tabsHTML = renderTabsHTML(activeTab);
+  document.getElementById('tabs').innerHTML = tabsHTML;
+  const mobileTabsEl = document.getElementById('tabs-mobile');
+  if (mobileTabsEl) mobileTabsEl.innerHTML = tabsHTML;
 
   // list
   const list = shows.filter(s => s.status===activeTab && (!filterTerm || s.title.toLowerCase().includes(filterTerm)));
   const container = document.getElementById('list-container');
+  const desktop = isDesktop();
 
   if (!list.length) {
-    container.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">${STATUS[activeTab].icon}</div>
-      <div class="empty-title">Nothing here yet</div>
-      <div class="empty-sub">${activeTab==='watching' ? 'Tap + to add a show' : 'Update a show\'s status to move it here'}</div>
-    </div>`;
+    container.innerHTML = `
+      ${desktop ? `<div class="desktop-section-title">${STATUS[activeTab].icon} ${STATUS[activeTab].label}</div>` : ''}
+      <div class="empty-state">
+        <div class="empty-icon">${STATUS[activeTab].icon}</div>
+        <div class="empty-title">Nothing here yet</div>
+        <div class="empty-sub">${activeTab==='watching' ? 'Click + to add a show' : 'Update a show\'s status to move it here'}</div>
+      </div>`;
     return;
   }
 
-  container.innerHTML = `<div class="drag-hint">⠿ hold & drag to reorder · tap to edit</div>` +
-    list.map((show, i) => {
-      const cfg = STATUS[show.status];
-      const p = pct(show);
-      let epLine = '';
-      if (show.status==='completed') epLine = `<div class="card-ep completed" style="--status-color:${cfg.color}">✓ All ${show.totalEpisodes||'?'} eps</div>`;
-      else if (show.status==='planning') epLine = `<div class="card-ep planning">${show.totalSeasons} seasons · ${show.totalEpisodes||'?'} eps</div>`;
-      else epLine = `<div class="card-ep">${epLabel(show)}</div>`;
+  const cardsHTML = list.map((show, i) => {
+    const cfg = STATUS[show.status];
+    const p = pct(show);
+    let epLine = '';
+    if (show.status==='completed') epLine = `<div class="card-ep completed" style="--status-color:${cfg.color}">✓ All ${show.totalEpisodes||'?'} eps</div>`;
+    else if (show.status==='planning') epLine = `<div class="card-ep planning">${show.totalSeasons} seasons · ${show.totalEpisodes||'?'} eps</div>`;
+    else epLine = `<div class="card-ep">${epLabel(show)}</div>`;
 
-      return `<div class="show-card" id="card-${show.id}" style="--status-color:${cfg.color}" data-id="${show.id}" data-idx="${i}" onclick="openDetail(${show.id})">
-        <div class="drag-handle" data-drag="${i}">⠿</div>
-        <div class="card-poster">${posterHTML(show.poster, show.title)}</div>
-        <div class="card-body">
-          <div>
-            <div class="card-title">${show.title}</div>
-            <div class="card-meta">${show.genre||''}${show.year?' · '+show.year:''}</div>
-          </div>
-          <div>
-            ${epLine}
-            <div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:${cfg.color};box-shadow:0 0 6px ${cfg.color}66"></div></div>
-          </div>
+    return `<div class="show-card" id="card-${show.id}" style="--status-color:${cfg.color}" data-id="${show.id}" data-idx="${i}" onclick="openDetail(${show.id})">
+      <div class="drag-handle" data-drag="${i}">⠿</div>
+      <div class="card-poster">${posterHTML(show.poster, show.title)}</div>
+      <div class="card-body">
+        <div>
+          <div class="card-title">${show.title}</div>
+          <div class="card-meta">${show.genre||''}${show.year?' · '+show.year:''}</div>
         </div>
-        <div class="card-rating">${starHTML(show.rating)}</div>
-      </div>`;
-    }).join('');
+        <div>
+          ${epLine}
+          <div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:${cfg.color};box-shadow:0 0 6px ${cfg.color}66"></div></div>
+        </div>
+      </div>
+      <div class="card-rating">${starHTML(show.rating)}</div>
+    </div>`;
+  }).join('');
 
-  setupDrag(list);
+  container.innerHTML = `
+    ${desktop ? `<div class="desktop-section-title">${STATUS[activeTab].icon} ${STATUS[activeTab].label}</div>` : '<div class="drag-hint">⠿ hold & drag to reorder · tap to edit</div>'}
+    <div id="cards-grid">${cardsHTML}</div>`;
+
+  if (!desktop) setupDrag(list);
 }
+
+window.addEventListener('resize', render);
 
 // ── Drag to reorder ───────────────────────────────────────────────────────────
 function setupDrag(list) {
@@ -509,23 +635,34 @@ async function doSearch() {
     statusEl.textContent = results.length ? '' : 'No results found.';
     statusEl.className = 'search-status';
     if (!results.length) { resultsEl.innerHTML = '<div class="search-empty">No results found</div>'; return; }
-    resultsEl.innerHTML = results.map(r => `
-      <div class="result-card" onclick="addShow(${r.id},'${escQ(r.name)}','${escQ(r.poster_path||'')}','${escQ(r.first_air_date||'')}',${r.vote_average||0},'${escQ(r.overview||'')}')">
-        <div class="result-poster">${r.poster_path ? `<img src="${TMDB_IMG}${r.poster_path}" alt="${escQ(r.name)}"/>` : '<div style="width:100%;min-height:84px;display:flex;align-items:center;justify-content:center;color:#1e293b;font-size:24px">🎬</div>'}</div>
+
+    // Store results in JS — never pass data through onclick strings
+    window._searchResults = results;
+
+    resultsEl.innerHTML = results.map((r, i) => `
+      <div class="result-card" data-idx="${i}">
+        <div class="result-poster">${r.poster_path ? `<img src="${TMDB_IMG}${r.poster_path}" alt="poster" onerror="this.style.display='none'"/>` : '<div style="width:100%;min-height:84px;display:flex;align-items:center;justify-content:center;color:#1e293b;font-size:24px">🎬</div>'}</div>
         <div class="result-info">
           <div class="result-title">${r.name}</div>
           <div class="result-meta">${r.first_air_date?.slice(0,4)||'?'} · ⭐ ${r.vote_average?.toFixed(1)||'?'}</div>
           <div class="result-overview">${r.overview||''}</div>
         </div>
       </div>`).join('');
+
+    // Attach click listeners after rendering
+    resultsEl.querySelectorAll('.result-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const r = window._searchResults[parseInt(card.dataset.idx)];
+        if (r) addShow(r.id, r.name, r.poster_path||'', r.first_air_date||'', r.vote_average||0, r.overview||'');
+      });
+    });
+
   } catch(e) {
     statusEl.textContent = 'Search failed — check your API key or network.';
     statusEl.className = 'search-status error';
     resultsEl.innerHTML = '';
   }
 }
-
-function escQ(s) { return String(s).replace(/'/g,"&#39;").replace(/"/g,'&quot;'); }
 
 async function addShow(id, name, poster, firstAir, rating, overview) {
   closeSheet('search-sheet');
@@ -729,6 +866,8 @@ function setTab(key) { activeTab = key; render(); }
 
 document.getElementById('search-input').addEventListener('input', e => {
   filterTerm = e.target.value.toLowerCase();
+  const mob = document.getElementById('search-input-mobile');
+  if (mob) mob.value = e.target.value;
   render();
 });
 
