@@ -11,9 +11,8 @@
   <link rel="apple-touch-icon" href="icon-192.png"/>
   <title>Watchlist</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
   <style>
-    /* ── Reset & base ───────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; background: #060b14; color: #f1f5f9; font-family: 'DM Sans', sans-serif; overscroll-behavior: none; }
     body { overflow-x: hidden; }
@@ -22,127 +21,155 @@
     img { user-select: none; -webkit-user-drag: none; }
     ::-webkit-scrollbar { display: none; }
 
-    /* ── Layout ─────────────────────────────────────── */
-    #app { min-height: 100vh; position: relative; }
-
-    /* ── DESKTOP sidebar layout ──────────────────────── */
+    /* ── DESKTOP ─────────────────────────────────────── */
     @media (min-width: 900px) {
-      ::-webkit-scrollbar { display: block; width: 6px; }
-      ::-webkit-scrollbar-track { background: #0a1628; }
+      ::-webkit-scrollbar { display: block; width: 5px; }
+      ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 99px; }
 
-      body { display: flex; }
-      #app { display: flex; flex-direction: row; width: 100%; }
+      body { display: flex; height: 100vh; overflow: hidden; }
+      #app { display: flex; width: 100%; height: 100%; }
 
-      /* Left sidebar */
+      /* Sidebar */
       #sidebar {
-        width: 260px; flex-shrink: 0; height: 100vh; position: sticky; top: 0;
-        background: #080f1c; border-right: 1px solid #111f30;
-        display: flex; flex-direction: column; padding: 32px 20px 24px;
-        overflow-y: auto;
+        width: 240px; flex-shrink: 0; height: 100%;
+        background: #07101f; border-right: 1px solid #0e1e30;
+        display: flex; flex-direction: column;
+        padding: 28px 16px 24px; overflow-y: auto;
       }
-      .sidebar-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
-      .sidebar-subtitle { font-size: 11px; color: #2d3f55; margin-bottom: 28px; }
-      #search-input {
-        width: 100%; background: #111f30; border: 1px solid #1e293b;
-        border-radius: 12px; padding: 10px 13px; color: #f1f5f9;
-        font-size: 14px; margin-bottom: 20px;
+      .sidebar-logo { font-size: 28px; margin-bottom: 4px; }
+      .sidebar-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; color: #f1f5f9; margin-bottom: 2px; }
+      .sidebar-subtitle { font-size: 11px; color: #243347; margin-bottom: 24px; }
+
+      /* Unified search bar in sidebar */
+      #sidebar-search-wrap { position: relative; margin-bottom: 6px; }
+      #sidebar-search {
+        width: 100%; background: #0f1e30; border: 1px solid #1a2d42;
+        border-radius: 10px; padding: 10px 36px 10px 12px; color: #f1f5f9;
+        font-size: 13px; transition: border-color 0.2s;
       }
-      #search-input::placeholder { color: #2d3f55; }
-      #tabs { flex-direction: column; gap: 2px; padding: 0; overflow-x: unset; }
+      #sidebar-search:focus { border-color: #4ade80; }
+      #sidebar-search::placeholder { color: #243347; }
+      #sidebar-search-icon { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); color: #243347; font-size: 13px; pointer-events: none; }
+
+      /* Search results dropdown */
+      #sidebar-search-results {
+        position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+        background: #0d1e30; border: 1px solid #1a2d42; border-radius: 12px;
+        z-index: 300; overflow: hidden; display: none;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+        max-height: 400px; overflow-y: auto;
+      }
+      #sidebar-search-results.visible { display: block; }
+      .sdr-item {
+        display: flex; gap: 10px; padding: 10px 12px; cursor: pointer;
+        border-bottom: 1px solid #0e1e30; align-items: center;
+        transition: background 0.15s;
+      }
+      .sdr-item:last-child { border-bottom: none; }
+      .sdr-item:hover { background: #1a2d42; }
+      .sdr-poster { width: 36px; height: 54px; object-fit: cover; border-radius: 5px; flex-shrink: 0; background: #060b14; display: flex; align-items: center; justify-content: center; font-size: 16px; overflow: hidden; }
+      .sdr-poster img { width: 100%; height: 100%; object-fit: cover; }
+      .sdr-info { flex: 1; min-width: 0; }
+      .sdr-title { font-size: 13px; font-weight: 600; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+      .sdr-meta { font-size: 10px; color: #475569; }
+      .sdr-add { flex-shrink: 0; background: #4ade80; color: #000; border-radius: 6px; width: 24px; height: 24px; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+      .sdr-add.added { background: #1a2d42; color: #4ade80; font-size: 12px; }
+      .sdr-loading { padding: 16px; text-align: center; color: #243347; font-size: 13px; }
+      .sdr-hint { padding: 12px; text-align: center; color: #1a2d42; font-size: 12px; }
+
+      /* Tabs in sidebar */
+      #tabs { display: flex; flex-direction: column; gap: 2px; overflow: visible; padding: 0; }
       .tab-btn {
-        border-bottom: none; border-radius: 10px; padding: 10px 12px;
-        font-size: 13px; justify-content: space-between; width: 100%;
+        background: transparent; color: #3d5166; border: none; border-radius: 9px;
+        padding: 9px 11px; font-size: 13px; font-weight: 600;
+        display: flex; align-items: center; justify-content: space-between; width: 100%;
+        transition: background 0.15s, color 0.15s; white-space: nowrap;
       }
-      .tab-btn.active { background: rgba(255,255,255,0.05); }
-      .sidebar-add-btn {
-        margin-top: auto; padding-top: 24px;
-        display: block;
-      }
-      #add-btn {
-        width: 100%; height: 44px; border-radius: 12px; font-size: 15px;
-        font-weight: 700; background: #4ade80; color: #000;
-        display: flex; align-items: center; justify-content: center; gap: 8px;
-      }
-      #add-btn::after { content: 'Add Show'; }
+      .tab-btn:hover { background: #0f1e30; color: #7a9ab5; }
+      .tab-btn.active { background: #0f1e30; color: var(--tab-color); }
+      .tab-left { display: flex; align-items: center; gap: 8px; }
+      .tab-icon { font-size: 12px; width: 16px; text-align: center; }
+      .tab-count { font-size: 10px; background: #0a1628; color: #3d5166; border-radius: 99px; padding: 1px 7px; font-variant-numeric: tabular-nums; }
+      .tab-btn.active .tab-count { background: rgba(255,255,255,0.07); color: var(--tab-color); }
 
-      /* Main content area */
-      #main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-      #header { display: none; } /* hide mobile header */
-      #list-container { padding: 32px 32px 60px; }
-      #api-notice { margin: 0 32px 20px; }
+      /* Main */
+      #main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+      #header { display: none; }
+      #mobile-tabs { display: none; }
 
-      /* Desktop: poster-card grid */
+      /* Desktop top bar */
+      #desktop-topbar {
+        padding: 28px 32px 20px; flex-shrink: 0;
+        display: flex; align-items: baseline; gap: 16px;
+        border-bottom: 1px solid #0e1e30;
+      }
+      .topbar-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 800; color: #f1f5f9; }
+      .topbar-sub { font-size: 12px; color: #243347; }
+
+      /* Cards grid */
+      #list-container { flex: 1; overflow-y: auto; padding: 28px 32px 60px; }
       #cards-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 20px;
       }
       .show-card {
-        flex-direction: column; min-height: unset; border-left: none;
-        border-top: 3px solid var(--status-color); border-radius: 14px;
-        margin-bottom: 0;
+        flex-direction: column; border-left: none;
+        border-top: 3px solid var(--status-color);
+        border-radius: 14px; margin-bottom: 0; min-height: unset;
+        transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
       }
-      .show-card:hover { background: #1a2540; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+      .show-card:hover { background: #111f30; transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
       .drag-handle { display: none; }
-      .card-poster { width: 100%; height: 220px; }
-      .card-poster img { width: 100%; height: 100%; object-fit: cover; }
-      .card-body { padding: 12px 12px 10px; }
-      .card-rating { padding: 0 12px 12px; justify-content: flex-start; }
-      .card-title { font-size: 14px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .card-poster { width: 100%; height: 240px; }
+      .card-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .card-body { padding: 13px 13px 8px; flex: 1; }
+      .card-rating { padding: 0 13px 13px; justify-content: flex-start; }
+      .card-title { font-size: 14px; white-space: normal; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .card-ep { font-size: 12px; color: #7a9ab5; font-weight: 600; margin-bottom: 6px; }
+      .card-ep.completed { color: var(--status-color); }
+      .card-ep.planning { color: #c084fc; }
 
-      /* Desktop sheet: centered modal instead of bottom sheet */
+      /* Desktop modal */
       .sheet-backdrop { align-items: center; justify-content: center; }
-      .sheet {
-        border-radius: 20px; max-width: 560px; width: 90%;
-        max-height: 85vh; transform: scale(0.95); transition: transform 0.25s cubic-bezier(.32,1,.67,1), opacity 0.25s;
-        opacity: 0;
-      }
+      .sheet { border-radius: 20px; max-width: 520px; width: 90%; max-height: 88vh; transform: scale(0.95); transition: transform 0.22s cubic-bezier(.32,1,.67,1), opacity 0.22s; opacity: 0; }
       .sheet-backdrop.open .sheet { transform: scale(1); opacity: 1; }
       .sheet-handle { display: none; }
       .detail-banner { border-radius: 20px 20px 0 0; }
-
-      /* Desktop: wider search results grid */
       .search-results { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 18px 32px; }
-
-      .drag-hint { display: none; }
-      .desktop-section-title {
-        font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
-        margin-bottom: 20px; color: #f1f5f9;
-      }
+      #api-notice { margin: 0 32px 20px; }
     }
 
-    /* ── MOBILE layout ───────────────────────────────── */
+    /* ── MOBILE ──────────────────────────────────────── */
     @media (max-width: 899px) {
       #sidebar { display: none; }
+      #desktop-topbar { display: none; }
       #main-content { display: contents; }
       #cards-grid { display: flex; flex-direction: column; }
-      .desktop-section-title { display: none; }
 
-      /* ── Header ──────────────────────────── */
       #header {
         position: sticky; top: 0; z-index: 100;
-        background: rgba(6,11,20,0.92);
+        background: rgba(6,11,20,0.93);
         backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-        border-bottom: 1px solid #111f30;
-        padding: env(safe-area-inset-top, 0) 0 0;
+        border-bottom: 1px solid #0e1e30;
+        padding: env(safe-area-inset-top,0) 0 0;
       }
       .header-inner { padding: 14px 16px 0; }
       .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
       .app-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
-      .app-subtitle { font-size: 11px; color: #2d3f55; font-variant-numeric: tabular-nums; margin-top: 2px; }
-      #search-input {
-        width: 100%; background: #111f30; border: 1px solid #1e293b;
+      .app-subtitle { font-size: 11px; color: #243347; margin-top: 2px; }
+      #mobile-search {
+        width: 100%; background: #0f1e30; border: 1px solid #1a2d42;
         border-radius: 12px; padding: 11px 14px; color: #f1f5f9; font-size: 15px;
       }
-      #search-input::placeholder { color: #2d3f55; }
-      #add-btn {
+      #mobile-search::placeholder { color: #243347; }
+      #mobile-add-btn {
         background: #4ade80; color: #000; border-radius: 14px;
         width: 44px; height: 44px; font-size: 26px; font-weight: 900;
         display: flex; align-items: center; justify-content: center; flex-shrink: 0;
       }
-      #add-btn:active { opacity: 0.75; }
-      #tabs { display: flex; overflow-x: auto; scrollbar-width: none; padding: 8px 10px 0; }
+      #mobile-tabs { display: flex; overflow-x: auto; scrollbar-width: none; padding: 8px 10px 0; }
       .tab-btn {
         background: transparent; color: #3d5166; border-bottom: 2px solid transparent;
         padding: 8px 12px 10px; font-size: 13px; font-weight: 700;
@@ -150,169 +177,139 @@
         display: flex; align-items: center; gap: 5px;
       }
       .tab-btn.active { border-bottom-color: var(--tab-color); color: var(--tab-color); }
+      .tab-left { display: contents; }
+      .tab-icon { display: none; }
       #list-container { padding: 14px 16px 120px; }
     }
 
-    .tab-count {
-      font-size: 10px; font-variant-numeric: tabular-nums;
-      background: #111f30; color: #3d5166;
-      border-radius: 99px; padding: 1px 6px;
-      transition: background 0.18s, color 0.18s;
-    }
-    .tab-btn.active .tab-count { background: rgba(255,255,255,0.08); color: var(--tab-color); }
-
-    /* ── Drag hint (mobile only) ─────────────────────── */
-    .drag-hint { font-size: 10px; color: #1e293b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-
-    /* ── Show card ───────────────────────────────────── */
+    /* ── Shared card styles ──────────────────────────── */
     .show-card {
-      background: #0d1b2a; border: 1px solid #1e293b;
+      background: #0d1b2a; border: 1px solid #1a2d42;
       border-left: 3px solid var(--status-color);
       border-radius: 14px; display: flex; align-items: stretch;
-      overflow: hidden; min-height: 88px; margin-bottom: 8px;
-      transition: background 0.2s, box-shadow 0.2s;
+      overflow: hidden; min-height: 90px; margin-bottom: 8px;
       cursor: pointer; user-select: none;
     }
-    .show-card.dragging { background: #1a2540; box-shadow: 0 10px 40px rgba(0,0,0,0.7); opacity: 0.95; }
-    .show-card.drag-over { transform: translateY(-2px); }
-    .drag-handle {
-      width: 30px; display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; color: #1e293b; font-size: 16px; touch-action: none; cursor: grab;
-    }
-    .card-poster {
-      width: 64px; flex-shrink: 0; overflow: hidden; background: #060b14;
-      display: flex; align-items: center; justify-content: center;
-    }
+    .show-card.dragging { background: #1a2540; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
+    .drag-handle { width: 30px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #1a2d42; font-size: 15px; touch-action: none; cursor: grab; }
+    .card-poster { width: 64px; flex-shrink: 0; overflow: hidden; background: #060b14; display: flex; align-items: center; justify-content: center; }
     .card-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .card-poster .poster-placeholder { font-size: 26px; color: #1e293b; }
-    .card-body { flex: 1; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 5px; min-width: 0; }
+    .card-body { flex: 1; padding: 11px 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 5px; min-width: 0; }
     .card-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-meta { font-size: 10px; color: #3d5166; margin-top: 1px; }
-    .card-ep { font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 600; color: #94a3b8; margin-bottom: 5px; }
+    .card-meta { font-size: 10px; color: #2d4155; margin-top: 1px; }
+    .card-ep { font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 600; color: #7a9ab5; margin-bottom: 5px; }
     .card-ep.completed { color: var(--status-color); }
     .card-ep.planning { color: #c084fc; }
-    .progress-bar { background: #1e293b; border-radius: 99px; height: 4px; overflow: hidden; }
+    .progress-bar { background: #0f1e30; border-radius: 99px; height: 4px; overflow: hidden; }
     .progress-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
-    .card-rating { display: flex; align-items: center; padding-right: 12px; flex-shrink: 0; }
+    .card-rating { display: flex; align-items: center; padding-right: 13px; flex-shrink: 0; }
     .stars { display: flex; gap: 1px; align-items: center; }
     .star { font-size: 11px; }
-    .star-val { font-size: 10px; color: #475569; margin-left: 3px; }
+    .star-val { font-size: 10px; color: #3d5166; margin-left: 3px; }
+
+    /* ── Tab count (shared) ──────────────────────────── */
+    .tab-count { font-size: 10px; font-variant-numeric: tabular-nums; border-radius: 99px; padding: 1px 6px; }
+    .tab-btn.active .tab-count { color: var(--tab-color); }
 
     /* ── Empty state ─────────────────────────────────── */
-    .empty-state { text-align: center; padding: 70px 20px; }
+    .empty-state { text-align: center; padding: 80px 20px; }
     .empty-icon { font-size: 44px; margin-bottom: 12px; }
-    .empty-title { font-family: 'Playfair Display', serif; font-size: 19px; color: #1e293b; margin-bottom: 6px; }
-    .empty-sub { font-size: 13px; color: #111f30; }
+    .empty-title { font-family: 'Playfair Display', serif; font-size: 19px; color: #1a2d42; margin-bottom: 6px; }
+    .empty-sub { font-size: 13px; color: #0e1e30; }
+    .drag-hint { font-size: 10px; color: #1a2d42; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
 
-    /* ── Bottom sheet ─────────────────────────────────── */
+    /* ── Sheet (modal / bottom sheet) ────────────────── */
     .sheet-backdrop {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       z-index: 200; display: flex; align-items: flex-end;
-      opacity: 0; transition: opacity 0.25s; pointer-events: none;
+      opacity: 0; transition: opacity 0.22s; pointer-events: none;
     }
     .sheet-backdrop.open { opacity: 1; pointer-events: all; }
     .sheet {
-      background: #0a1628; border-top: 1px solid #1e293b;
+      background: #08111e; border-top: 1px solid #1a2d42;
       border-radius: 22px 22px 0 0; width: 100%; max-height: 94vh;
       display: flex; flex-direction: column; overflow: hidden;
-      transform: translateY(100%); transition: transform 0.3s cubic-bezier(.32,1,.67,1);
-      padding-bottom: env(safe-area-inset-bottom, 0);
+      transform: translateY(100%); transition: transform 0.28s cubic-bezier(.32,1,.67,1);
+      padding-bottom: env(safe-area-inset-bottom,0);
     }
     .sheet-backdrop.open .sheet { transform: translateY(0); }
     .sheet-handle { display: flex; justify-content: center; padding: 14px 0 6px; flex-shrink: 0; }
-    .sheet-handle-bar { width: 38px; height: 4px; background: #334155; border-radius: 99px; }
-    .sheet-title { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 700; padding: 4px 18px 14px; flex-shrink: 0; }
+    .sheet-handle-bar { width: 38px; height: 4px; background: #1e293b; border-radius: 99px; }
     .sheet-body { overflow-y: auto; flex: 1; }
 
-    /* ── Search sheet ────────────────────────────────── */
+    /* ── Mobile search sheet ─────────────────────────── */
+    .sheet-title { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 700; padding: 4px 18px 14px; flex-shrink: 0; }
     .search-row { display: flex; gap: 10px; padding: 0 18px 14px; flex-shrink: 0; }
-    .search-row input { flex: 1; background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px 14px; color: #f1f5f9; font-size: 16px; }
-    .search-row input::placeholder { color: #334155; }
+    .search-row input { flex: 1; background: #111f30; border: 1px solid #1e293b; border-radius: 12px; padding: 12px 14px; color: #f1f5f9; font-size: 16px; }
+    .search-row input::placeholder { color: #243347; }
     .go-btn { background: #4ade80; color: #000; border-radius: 12px; padding: 0 20px; font-size: 15px; font-weight: 700; flex-shrink: 0; min-width: 60px; }
-    .go-btn:active { opacity: 0.75; }
     .search-status { padding: 0 18px 10px; font-size: 12px; }
     .search-status.error { color: #f87171; }
     .search-status.info { color: #60a5fa; }
     .search-results { padding: 0 18px 44px; display: flex; flex-direction: column; gap: 10px; }
-    .search-empty { color: #334155; text-align: center; padding: 28px 0; font-size: 14px; }
-    .result-card {
-      display: flex; background: #1e293b; border-radius: 12px; overflow: hidden;
-      cursor: pointer; min-height: 80px; -webkit-tap-highlight-color: transparent;
-    }
-    .result-card:active { opacity: 0.8; }
+    .search-empty { color: #1e293b; text-align: center; padding: 28px 0; font-size: 14px; }
+    .result-card { display: flex; background: #111f30; border-radius: 12px; overflow: hidden; cursor: pointer; min-height: 80px; -webkit-tap-highlight-color: transparent; border: 1px solid #1a2d42; }
+    .result-card:hover, .result-card:active { background: #1a2d42; }
     .result-poster { width: 56px; flex-shrink: 0; background: #060b14; overflow: hidden; }
     .result-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .result-info { padding: 10px 14px; flex: 1; min-width: 0; }
     .result-title { font-family: 'Playfair Display', serif; font-size: 15px; color: #f1f5f9; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .result-meta { font-size: 11px; color: #475569; margin-bottom: 5px; }
-    .result-overview { font-size: 12px; color: #64748b; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .result-overview { font-size: 12px; color: #3d5166; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .result-add { flex-shrink: 0; display: flex; align-items: center; padding-right: 14px; }
+    .result-add-btn { background: #4ade80; color: #000; border-radius: 8px; width: 28px; height: 28px; font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .result-add-btn.added { background: #1a2d42; color: #4ade80; font-size: 13px; font-weight: 700; }
 
     /* ── Detail sheet ────────────────────────────────── */
-    .detail-banner { position: relative; height: 148px; flex-shrink: 0; overflow: hidden; background: #060b14; }
-    .banner-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(12px) brightness(0.25); transform: scale(1.15); }
-    .banner-content { position: absolute; inset: 0; display: flex; gap: 14px; padding: 14px 18px; align-items: flex-end; }
-    .banner-poster { width: 68px; height: 102px; flex-shrink: 0; border-radius: 10px; overflow: hidden; border: 2px solid #334155; background: #060b14; }
+    .detail-banner { position: relative; height: 150px; flex-shrink: 0; overflow: hidden; background: #060b14; }
+    .banner-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(14px) brightness(0.22); transform: scale(1.1); }
+    .banner-content { position: absolute; inset: 0; display: flex; gap: 14px; padding: 16px 18px; align-items: flex-end; }
+    .banner-poster { width: 68px; height: 102px; flex-shrink: 0; border-radius: 10px; overflow: hidden; border: 2px solid #1e293b; background: #060b14; }
     .banner-poster img { width: 100%; height: 100%; object-fit: cover; }
     .banner-info { padding-bottom: 4px; min-width: 0; }
     .banner-title { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; line-height: 1.2; margin-bottom: 3px; }
-    .banner-sub { font-size: 11px; color: #94a3b8; margin-bottom: 5px; }
-    .close-btn { position: absolute; top: 14px; right: 16px; background: rgba(0,0,0,0.5); color: #94a3b8; border-radius: 50%; width: 32px; height: 32px; font-size: 16px; display: flex; align-items: center; justify-content: center; }
-    .close-btn:active { opacity: 0.75; }
-    .detail-body { overflow-y: auto; padding: 18px 18px 48px; display: flex; flex-direction: column; gap: 18px; }
-    .section-label { font-size: 10px; color: #3d5166; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
-
-    /* Status grid */
+    .banner-sub { font-size: 11px; color: #7a9ab5; margin-bottom: 5px; }
+    .close-btn { position: absolute; top: 14px; right: 16px; background: rgba(0,0,0,0.55); color: #7a9ab5; border-radius: 50%; width: 32px; height: 32px; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .detail-body { padding: 18px 18px 48px; display: flex; flex-direction: column; gap: 18px; }
+    .section-label { font-size: 10px; color: #2d4155; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 10px; font-weight: 700; }
     .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .status-btn {
-      background: #1e293b; color: #475569;
-      border: 1px solid #2d3f55; border-radius: 12px;
-      padding: 12px 8px; font-size: 13px; font-weight: 700;
-      transition: all 0.15s; -webkit-tap-highlight-color: transparent;
-    }
+    .status-btn { background: #111f30; color: #3d5166; border: 1px solid #1a2d42; border-radius: 12px; padding: 12px 8px; font-size: 13px; font-weight: 700; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
     .status-btn.active { color: #000; }
-    .status-btn:active { opacity: 0.8; }
-
-    /* Episode pickers */
     .picker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-    .picker-box { background: #1e293b; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .picker-label { font-size: 10px; color: #3d5166; text-transform: uppercase; }
+    .picker-box { background: #111f30; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .picker-label { font-size: 10px; color: #2d4155; text-transform: uppercase; font-weight: 700; }
     .picker-controls { display: flex; gap: 8px; align-items: center; width: 100%; }
-    .picker-btn { background: #0d1b2a; color: #f1f5f9; border-radius: 10px; width: 40px; height: 40px; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+    .picker-btn { background: #0a1628; color: #f1f5f9; border-radius: 10px; width: 40px; height: 40px; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .picker-btn.green { background: #4ade80; color: #000; }
     .picker-btn:active { opacity: 0.75; }
     .picker-val { flex: 1; text-align: center; font-size: 28px; font-weight: 700; color: #f1f5f9; }
-    .picker-of { font-size: 10px; color: #2d3f55; }
-    .overall-box { background: #1e293b; border-radius: 10px; padding: 10px 14px; }
+    .picker-of { font-size: 10px; color: #1e293b; }
+    .overall-box { background: #111f30; border-radius: 10px; padding: 10px 14px; }
     .overall-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; }
-    .overall-label { color: #3d5166; }
-
-    /* Completed banner */
-    .completed-box { background: #1e293b; border-radius: 14px; padding: 18px 16px; text-align: center; }
+    .overall-label { color: #2d4155; }
+    .completed-box { background: #111f30; border-radius: 14px; padding: 18px 16px; text-align: center; }
     .completed-emoji { font-size: 28px; margin-bottom: 8px; }
     .completed-title { font-family: 'Playfair Display', serif; font-size: 17px; color: #60a5fa; margin-bottom: 4px; }
-    .completed-sub { font-size: 12px; color: #3d5166; }
-
-    /* Action buttons */
+    .completed-sub { font-size: 12px; color: #2d4155; }
     .action-col { display: flex; flex-direction: column; gap: 10px; }
     .save-btn { background: #4ade80; color: #000; border-radius: 14px; height: 52px; font-size: 16px; font-weight: 700; width: 100%; }
     .save-btn:active { opacity: 0.8; }
-    .remove-btn { background: transparent; color: #f87171; border: 1px solid rgba(248,113,113,0.2); border-radius: 14px; height: 44px; font-size: 14px; font-weight: 700; width: 100%; }
-    .remove-btn:active { opacity: 0.8; }
+    .remove-btn { background: transparent; color: #f87171; border: 1px solid rgba(248,113,113,0.18); border-radius: 14px; height: 44px; font-size: 14px; font-weight: 700; width: 100%; }
 
-    /* ── Loading spinner ─────────────────────────────── */
-    .spinner { width: 20px; height: 20px; border: 2px solid #334155; border-top-color: #4ade80; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto; }
+    /* ── Spinner ─────────────────────────────────────── */
+    .spinner { width: 18px; height: 18px; border: 2px solid #1e293b; border-top-color: #4ade80; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── API Key notice ──────────────────────────────── */
-    #api-notice {
-      background: #1a1000; border: 1px solid #facc1533;
-      border-radius: 14px; padding: 14px 16px; margin: 0 16px 16px;
-      font-size: 13px; color: #facc15; line-height: 1.5;
-    }
+    /* ── API notice ──────────────────────────────────── */
+    #api-notice { background: #120e00; border: 1px solid #facc1522; border-radius: 14px; padding: 14px 16px; margin: 0 16px 16px; font-size: 13px; color: #facc15; line-height: 1.5; }
     #api-notice a { color: #4ade80; }
-    #api-notice input { background: #0d1b2a; border: 1px solid #334155; border-radius: 8px; padding: 8px 12px; color: #f1f5f9; font-size: 13px; width: 100%; margin-top: 8px; }
+    #api-notice input { background: #0a1628; border: 1px solid #1e293b; border-radius: 8px; padding: 8px 12px; color: #f1f5f9; font-size: 13px; width: 100%; margin-top: 8px; }
     #api-notice button { background: #4ade80; color: #000; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 700; margin-top: 8px; }
+
+    /* Desktop section title */
+    .desktop-section-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 22px; color: #f1f5f9; }
+    @media (max-width: 899px) { .desktop-section-title { display: none; } }
   </style>
 </head>
 <body>
@@ -320,16 +317,23 @@
 
   <!-- DESKTOP SIDEBAR -->
   <div id="sidebar">
-    <div class="sidebar-title">📺 Watchlist</div>
-    <div class="sidebar-subtitle" id="sidebar-subtitle">0 watching · 0 total</div>
-    <input type="search" id="search-input" placeholder="🔍  Search your shows…"/>
-    <div id="tabs"></div>
-    <div class="sidebar-add-btn">
-      <button id="add-btn"></button>
+    <div class="sidebar-logo">📺</div>
+    <div class="sidebar-title">Watchlist</div>
+    <div class="sidebar-subtitle" id="sidebar-subtitle">Loading…</div>
+
+    <!-- Unified search: filters existing + searches TMDB -->
+    <div id="sidebar-search-wrap">
+      <input type="search" id="sidebar-search" placeholder="Search or add a show…" autocomplete="off"/>
+      <span id="sidebar-search-icon">⌕</span>
+      <div id="sidebar-search-results">
+        <div class="sdr-hint">Type to search TMDB or filter your list</div>
+      </div>
     </div>
+
+    <div id="tabs"></div>
   </div>
 
-  <!-- MAIN CONTENT (mobile header + list) -->
+  <!-- MAIN CONTENT -->
   <div id="main-content">
 
     <!-- Mobile header -->
@@ -338,19 +342,25 @@
         <div class="header-row">
           <div>
             <div class="app-title">📺 Watchlist</div>
-            <div class="app-subtitle" id="subtitle">0 watching · 0 total</div>
+            <div class="app-subtitle" id="subtitle">Loading…</div>
           </div>
-          <button id="add-btn-mobile" onclick="document.getElementById('add-btn').click()" style="background:#4ade80;color:#000;border-radius:14px;width:44px;height:44px;font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>
+          <button id="mobile-add-btn">+</button>
         </div>
-        <input type="search" id="search-input-mobile" placeholder="🔍  Search your shows…" oninput="document.getElementById('search-input').value=this.value;filterTerm=this.value.toLowerCase();render();" style="width:100%;background:#111f30;border:1px solid #1e293b;border-radius:12px;padding:11px 14px;color:#f1f5f9;font-size:15px;margin-bottom:0;"/>
+        <input type="search" id="mobile-search" placeholder="🔍  Filter your shows…"/>
       </div>
-      <div id="tabs-mobile"></div>
+      <div id="mobile-tabs"></div>
+    </div>
+
+    <!-- Desktop top bar -->
+    <div id="desktop-topbar">
+      <span class="topbar-title" id="topbar-title">Watching</span>
+      <span class="topbar-sub" id="topbar-sub"></span>
     </div>
 
     <div id="api-notice" style="display:none">
-      ⚠️ Add your free TMDB API key to enable search.<br>
+      ⚠️ Add your TMDB API key to enable show search.
       Get one free at <a href="https://www.themoviedb.org/settings/api" target="_blank">themoviedb.org</a> → Settings → API
-      <br><input type="text" id="api-key-input" placeholder="Paste your API key here…"/>
+      <br><input type="text" id="api-key-input" placeholder="Paste your API key…"/>
       <br><button onclick="saveApiKey()">Save Key</button>
     </div>
 
@@ -358,7 +368,7 @@
   </div>
 </div>
 
-<!-- Search sheet -->
+<!-- Mobile search/add sheet -->
 <div class="sheet-backdrop" id="search-sheet">
   <div class="sheet">
     <div class="sheet-handle"><div class="sheet-handle-bar"></div></div>
@@ -388,7 +398,6 @@
 </div>
 
 <script>
-// ── Config ────────────────────────────────────────────────────────────────────
 const TMDB_IMG = 'https://image.tmdb.org/t/p/w342';
 let TMDB_KEY = localStorage.getItem('tmdb_api_key') || '37326935515fc56c9c87dfe9a7613c15';
 
@@ -401,147 +410,121 @@ const TABS = [
 ];
 const STATUS = Object.fromEntries(TABS.map(t => [t.key, t]));
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let shows = [];
-let activeTab = 'watching';
-let filterTerm = '';
-let editingShow = null;
-let editStatus, editSeason, editEpisode;
+let shows = [], activeTab = 'watching', filterTerm = '';
+let editingShow = null, editStatus, editSeason, editEpisode;
 
 // ── Persistence ───────────────────────────────────────────────────────────────
 function load() {
-  try { shows = JSON.parse(localStorage.getItem('watchlist_v1') || '[]'); }
-  catch { shows = []; }
+  try { shows = JSON.parse(localStorage.getItem('watchlist_v1') || '[]'); } catch { shows = []; }
   if (!shows.length) shows = [
     { id: 1396, title: 'Breaking Bad', status: 'completed', currentSeason: 5, currentEpisode: 16, totalSeasons: 5, totalEpisodes: 62, seasonEpisodes: [7,13,13,13,16], poster: '/ggFHVNu6YYI5L9pCfOacjizRGt.jpg', rating: 9.5, year: 2008, genre: 'Drama' },
     { id: 1399, title: 'Game of Thrones', status: 'paused', currentSeason: 6, currentEpisode: 3, totalSeasons: 8, totalEpisodes: 73, seasonEpisodes: [10,10,10,10,10,10,7,6], poster: '/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg', rating: 9.2, year: 2011, genre: 'Fantasy' },
   ];
 }
 function save() { localStorage.setItem('watchlist_v1', JSON.stringify(shows)); }
-
 function saveApiKey() {
   const v = document.getElementById('api-key-input').value.trim();
   if (!v) return;
-  TMDB_KEY = v;
-  localStorage.setItem('tmdb_api_key', v);
+  TMDB_KEY = v; localStorage.setItem('tmdb_api_key', v);
   document.getElementById('api-notice').style.display = 'none';
-  alert('API key saved! Search will now work.');
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function pad(n) { return String(n).padStart(2,'0'); }
+const pad = n => String(n).padStart(2,'0');
+const isDesktop = () => window.innerWidth >= 900;
 
 function epLabel(show) {
   const max = show.seasonEpisodes?.[show.currentSeason-1];
   return `S${pad(show.currentSeason)} E${pad(show.currentEpisode)}${max ? ' / '+max : ''}`;
 }
-
 function pct(show) {
   if (show.status === 'completed') return 100;
   if (!show.seasonEpisodes?.length || !show.totalEpisodes) return 0;
   let w = 0;
   for (let s = 0; s < show.currentSeason-1; s++) w += show.seasonEpisodes[s]||0;
-  w += show.currentEpisode;
-  return Math.min(100, (w/show.totalEpisodes)*100);
+  return Math.min(100, (w + show.currentEpisode) / show.totalEpisodes * 100);
 }
-
-function watchedEps(show, season, episode) {
-  if (!show.seasonEpisodes?.length) return episode;
+function watchedEps(show, season, ep) {
   let w = 0;
-  for (let s = 0; s < season-1; s++) w += show.seasonEpisodes[s]||0;
-  return w + episode;
+  for (let s = 0; s < season-1; s++) w += show.seasonEpisodes?.[s]||0;
+  return w + ep;
 }
-
 function starHTML(rating) {
   let h = '<div class="stars">';
-  for (let i=1;i<=5;i++) h += `<span class="star" style="color:${i<=Math.round(rating/2)?'#facc15':'#1e293b'}">★</span>`;
-  h += `<span class="star-val">${rating?.toFixed(1)}</span></div>`;
-  return h;
+  for (let i=1;i<=5;i++) h += `<span class="star" style="color:${i<=Math.round(rating/2)?'#facc15':'#1a2d42'}">★</span>`;
+  return h + `<span class="star-val">${rating?.toFixed(1)}</span></div>`;
 }
-
-function posterHTML(path, title, w=64) {
-  if (!path) return `<div class="poster-placeholder" style="font-size:${w*0.4}px">🎬</div>`;
+function posterImg(path, alt) {
+  if (!path) return `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;color:#1a2d42">🎬</div>`;
   const src = path.startsWith('http') ? path : TMDB_IMG+path;
-  return `<img src="${src}" alt="${title}" onerror="this.style.display='none'"/>`;
+  return `<img src="${src}" alt="${alt||''}" onerror="this.style.display='none'"/>`;
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
-const isDesktop = () => window.innerWidth >= 900;
+function render() {
+  const watching = shows.filter(s=>s.status==='watching').length;
+  const subText = `${watching} watching · ${shows.length} total`;
+  ['subtitle','sidebar-subtitle'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=subText; });
 
-function renderTabsHTML(activeKey) {
-  return TABS.map(tab => {
+  document.getElementById('api-notice').style.display = TMDB_KEY === 'YOUR_TMDB_API_KEY_HERE' ? 'block' : 'none';
+
+  // Tabs
+  const tabsHTML = TABS.map(tab => {
     const count = shows.filter(s=>s.status===tab.key).length;
-    const active = activeKey === tab.key ? 'active' : '';
+    const active = activeTab===tab.key ? 'active' : '';
     return `<button class="tab-btn ${active}" style="--tab-color:${tab.color}" onclick="setTab('${tab.key}')">
-      <span>${tab.icon} ${tab.label}</span>
+      <span class="tab-left"><span class="tab-icon">${tab.icon}</span>${tab.label}</span>
       ${count>0 ? `<span class="tab-count">${count}</span>` : ''}
     </button>`;
   }).join('');
-}
-
-function render() {
-  const watching = shows.filter(s=>s.status==='watching').length;
-  const subtitleText = `${watching} watching · ${shows.length} total`;
-
-  // Update both subtitle elements
-  const sub = document.getElementById('subtitle');
-  const subsid = document.getElementById('sidebar-subtitle');
-  if (sub) sub.textContent = subtitleText;
-  if (subsid) subsid.textContent = subtitleText;
-
-  // api notice
-  const needsKey = TMDB_KEY === 'YOUR_TMDB_API_KEY_HERE';
-  document.getElementById('api-notice').style.display = needsKey ? 'block' : 'none';
-
-  // Render tabs in both sidebar + mobile tab bar
-  const tabsHTML = renderTabsHTML(activeTab);
   document.getElementById('tabs').innerHTML = tabsHTML;
-  const mobileTabsEl = document.getElementById('tabs-mobile');
-  if (mobileTabsEl) mobileTabsEl.innerHTML = tabsHTML;
+  const mt = document.getElementById('mobile-tabs'); if(mt) mt.innerHTML = tabsHTML;
 
-  // list
+  // Desktop top bar
+  const cfg = STATUS[activeTab];
+  const ttEl = document.getElementById('topbar-title');
+  const tsEl = document.getElementById('topbar-sub');
+  if(ttEl) ttEl.textContent = `${cfg.icon} ${cfg.label}`;
+  if(tsEl) tsEl.textContent = `${shows.filter(s=>s.status===activeTab).length} shows`;
+
+  // List
   const list = shows.filter(s => s.status===activeTab && (!filterTerm || s.title.toLowerCase().includes(filterTerm)));
   const container = document.getElementById('list-container');
   const desktop = isDesktop();
 
   if (!list.length) {
     container.innerHTML = `
-      ${desktop ? `<div class="desktop-section-title">${STATUS[activeTab].icon} ${STATUS[activeTab].label}</div>` : ''}
+      ${desktop ? `<div class="desktop-section-title"></div>` : ''}
       <div class="empty-state">
         <div class="empty-icon">${STATUS[activeTab].icon}</div>
         <div class="empty-title">Nothing here yet</div>
-        <div class="empty-sub">${activeTab==='watching' ? 'Click + to add a show' : 'Update a show\'s status to move it here'}</div>
+        <div class="empty-sub">${activeTab==='watching' ? 'Search for a show to add it' : "Update a show's status to move it here"}</div>
       </div>`;
     return;
   }
 
-  const cardsHTML = list.map((show, i) => {
-    const cfg = STATUS[show.status];
-    const p = pct(show);
-    let epLine = '';
-    if (show.status==='completed') epLine = `<div class="card-ep completed" style="--status-color:${cfg.color}">✓ All ${show.totalEpisodes||'?'} eps</div>`;
-    else if (show.status==='planning') epLine = `<div class="card-ep planning">${show.totalSeasons} seasons · ${show.totalEpisodes||'?'} eps</div>`;
-    else epLine = `<div class="card-ep">${epLabel(show)}</div>`;
-
-    return `<div class="show-card" id="card-${show.id}" style="--status-color:${cfg.color}" data-id="${show.id}" data-idx="${i}" onclick="openDetail(${show.id})">
+  const cardsHTML = list.map((show,i) => {
+    const c = STATUS[show.status], p = pct(show);
+    let epLine = show.status==='completed'
+      ? `<div class="card-ep completed" style="--status-color:${c.color}">✓ ${show.totalEpisodes||'?'} episodes</div>`
+      : show.status==='planning'
+      ? `<div class="card-ep planning">${show.seasonEpisodes?.length||show.totalSeasons||'?'} seasons · ${show.totalEpisodes||'?'} eps</div>`
+      : `<div class="card-ep">${epLabel(show)}</div>`;
+    return `<div class="show-card" style="--status-color:${c.color}" data-id="${show.id}" data-idx="${i}" onclick="openDetail(${show.id})">
       <div class="drag-handle" data-drag="${i}">⠿</div>
-      <div class="card-poster">${posterHTML(show.poster, show.title)}</div>
+      <div class="card-poster">${posterImg(show.poster, show.title)}</div>
       <div class="card-body">
         <div>
           <div class="card-title">${show.title}</div>
           <div class="card-meta">${show.genre||''}${show.year?' · '+show.year:''}</div>
         </div>
-        <div>
-          ${epLine}
-          <div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:${cfg.color};box-shadow:0 0 6px ${cfg.color}66"></div></div>
-        </div>
+        <div>${epLine}<div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:${c.color};box-shadow:0 0 6px ${c.color}55"></div></div></div>
       </div>
       <div class="card-rating">${starHTML(show.rating)}</div>
     </div>`;
   }).join('');
 
-  container.innerHTML = `
-    ${desktop ? `<div class="desktop-section-title">${STATUS[activeTab].icon} ${STATUS[activeTab].label}</div>` : '<div class="drag-hint">⠿ hold & drag to reorder · tap to edit</div>'}
+  container.innerHTML = `${!desktop ? '<div class="drag-hint">⠿ hold handle to reorder</div>' : ''}
     <div id="cards-grid">${cardsHTML}</div>`;
 
   if (!desktop) setupDrag(list);
@@ -549,70 +532,157 @@ function render() {
 
 window.addEventListener('resize', render);
 
-// ── Drag to reorder ───────────────────────────────────────────────────────────
+// ── Drag ──────────────────────────────────────────────────────────────────────
 function setupDrag(list) {
-  const cards = document.querySelectorAll('.show-card');
-  let dragSrc = null, dragSrcIdx = null;
-
-  cards.forEach((card) => {
+  document.querySelectorAll('.show-card').forEach(card => {
     const handle = card.querySelector('.drag-handle');
+    if (!handle) return;
     const idx = parseInt(card.dataset.idx);
+    let dragSrcIdx = null;
 
-    // Mouse
-    handle.addEventListener('mousedown', e => {
-      e.preventDefault();
-      dragSrc = card; dragSrcIdx = idx;
-      card.classList.add('dragging');
-      const onMove = me => {
-        const el = document.elementFromPoint(me.clientX, me.clientY)?.closest('.show-card');
-        document.querySelectorAll('.show-card').forEach(c => c.classList.remove('drag-over'));
-        if (el && el !== dragSrc) el.classList.add('drag-over');
-      };
-      const onUp = me => {
-        card.classList.remove('dragging');
-        document.querySelectorAll('.show-card').forEach(c => c.classList.remove('drag-over'));
-        const target = document.elementFromPoint(me.clientX, me.clientY)?.closest('.show-card');
-        if (target && target !== dragSrc) commitReorder(dragSrcIdx, parseInt(target.dataset.idx), list);
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onUp);
-      };
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onUp);
-    });
-
-    // Touch
-    handle.addEventListener('touchstart', e => {
-      e.preventDefault();
-      dragSrc = card; dragSrcIdx = idx;
-      card.classList.add('dragging');
-    }, { passive: false });
-    handle.addEventListener('touchmove', e => {
-      e.preventDefault();
-      const t = e.touches[0];
-      const el = document.elementFromPoint(t.clientX, t.clientY)?.closest('.show-card');
-      document.querySelectorAll('.show-card').forEach(c => c.classList.remove('drag-over'));
-      if (el && el !== dragSrc) el.classList.add('drag-over');
-    }, { passive: false });
-    handle.addEventListener('touchend', e => {
+    const startDrag = () => { dragSrcIdx = idx; card.classList.add('dragging'); };
+    const endDrag = (targetCard) => {
       card.classList.remove('dragging');
       document.querySelectorAll('.show-card').forEach(c => c.classList.remove('drag-over'));
-      const t = e.changedTouches[0];
-      const target = document.elementFromPoint(t.clientX, t.clientY)?.closest('.show-card');
-      if (target && target !== dragSrc) commitReorder(dragSrcIdx, parseInt(target.dataset.idx), list);
+      if (targetCard && targetCard !== card) commitReorder(dragSrcIdx, parseInt(targetCard.dataset.idx));
+    };
+
+    handle.addEventListener('mousedown', e => {
+      e.preventDefault(); startDrag();
+      const mv = me => {
+        const el = document.elementFromPoint(me.clientX, me.clientY)?.closest('.show-card');
+        document.querySelectorAll('.show-card').forEach(c => c.classList.remove('drag-over'));
+        if (el && el !== card) el.classList.add('drag-over');
+      };
+      const up = me => {
+        endDrag(document.elementFromPoint(me.clientX, me.clientY)?.closest('.show-card'));
+        window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up);
+      };
+      window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
+    });
+    handle.addEventListener('touchstart', e => { e.preventDefault(); startDrag(); }, { passive: false });
+    handle.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const el = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY)?.closest('.show-card');
+      document.querySelectorAll('.show-card').forEach(c => c.classList.remove('drag-over'));
+      if (el && el !== card) el.classList.add('drag-over');
+    }, { passive: false });
+    handle.addEventListener('touchend', e => {
+      endDrag(document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)?.closest('.show-card'));
     });
   });
 }
 
-function commitReorder(fromIdx, toIdx, list) {
-  const tabShows = shows.filter(s=>s.status===activeTab);
-  const otherShows = shows.filter(s=>s.status!==activeTab);
-  const [moved] = tabShows.splice(fromIdx, 1);
-  tabShows.splice(toIdx, 0, moved);
-  shows = [...otherShows, ...tabShows];
+function commitReorder(fromIdx, toIdx) {
+  const tab = shows.filter(s=>s.status===activeTab);
+  const rest = shows.filter(s=>s.status!==activeTab);
+  const [moved] = tab.splice(fromIdx, 1);
+  tab.splice(toIdx, 0, moved);
+  shows = [...rest, ...tab];
   save(); render();
 }
 
-// ── Search ────────────────────────────────────────────────────────────────────
+// ── Desktop unified search ────────────────────────────────────────────────────
+let sdrDebounce = null;
+const sdrInput = document.getElementById('sidebar-search');
+const sdrResults = document.getElementById('sidebar-search-results');
+
+sdrInput?.addEventListener('input', () => {
+  const q = sdrInput.value.trim();
+  filterTerm = q.toLowerCase();
+  render(); // live filter existing shows
+
+  clearTimeout(sdrDebounce);
+  if (!q) { sdrResults.classList.remove('visible'); return; }
+
+  // Show local matches instantly
+  const local = shows.filter(s => s.title.toLowerCase().includes(q.toLowerCase()));
+  renderSdrResults(local, q, true); // true = loading TMDB
+
+  if (TMDB_KEY === 'YOUR_TMDB_API_KEY_HERE') {
+    renderSdrResults(local, q, false);
+    return;
+  }
+
+  sdrDebounce = setTimeout(() => fetchSdrTMDB(q, local), 400);
+});
+
+sdrInput?.addEventListener('keydown', e => { if (e.key === 'Escape') { sdrResults.classList.remove('visible'); sdrInput.blur(); } });
+document.addEventListener('click', e => { if (!sdrInput?.contains(e.target) && !sdrResults?.contains(e.target)) sdrResults?.classList.remove('visible'); });
+
+async function fetchSdrTMDB(q, localMatches) {
+  try {
+    const res = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=en-US`);
+    const data = await res.json();
+    const tmdbResults = (data.results||[]).slice(0,6);
+    window._sdrTMDB = tmdbResults;
+    renderSdrResults(localMatches, q, false, tmdbResults);
+  } catch { renderSdrResults(localMatches, q, false); }
+}
+
+function renderSdrResults(localMatches, q, loadingTMDB, tmdbResults=[]) {
+  sdrResults.classList.add('visible');
+  const existingIds = new Set(shows.map(s=>s.id));
+
+  // TMDB results not already in library
+  const newShows = tmdbResults.filter(r => !existingIds.has(r.id));
+
+  let html = '';
+
+  if (localMatches.length) {
+    html += `<div style="padding:8px 12px 4px;font-size:10px;color:#2d4155;text-transform:uppercase;letter-spacing:0.08em;font-weight:700">Your Library</div>`;
+    html += localMatches.slice(0,4).map((s,i) => {
+      const cfg = STATUS[s.status];
+      return `<div class="sdr-item" data-localidx="${i}">
+        <div class="sdr-poster">${posterImg(s.poster, s.title)}</div>
+        <div class="sdr-info">
+          <div class="sdr-title">${s.title}</div>
+          <div class="sdr-meta" style="color:${cfg.color}">${cfg.icon} ${cfg.label}</div>
+        </div>
+        <div class="sdr-add added" style="color:${cfg.color}">✓</div>
+      </div>`;
+    }).join('');
+  }
+
+  if (loadingTMDB) {
+    html += `<div class="sdr-loading"><div class="spinner" style="margin:0 auto"></div></div>`;
+  } else if (newShows.length) {
+    html += `<div style="padding:8px 12px 4px;font-size:10px;color:#2d4155;text-transform:uppercase;letter-spacing:0.08em;font-weight:700">Add from TMDB</div>`;
+    html += newShows.map((r,i) => `<div class="sdr-item" data-tmdbidx="${i}">
+      <div class="sdr-poster">${r.poster_path ? `<img src="${TMDB_IMG}${r.poster_path}" alt="${r.name}" onerror="this.style.display='none'"/>` : '🎬'}</div>
+      <div class="sdr-info">
+        <div class="sdr-title">${r.name}</div>
+        <div class="sdr-meta">${r.first_air_date?.slice(0,4)||'?'} · ⭐ ${r.vote_average?.toFixed(1)||'?'}</div>
+      </div>
+      <div class="sdr-add">+</div>
+    </div>`).join('');
+  } else if (!loadingTMDB && !localMatches.length) {
+    html = `<div class="sdr-hint">No results found</div>`;
+  }
+
+  sdrResults.innerHTML = html;
+
+  // Click on local → open detail
+  sdrResults.querySelectorAll('[data-localidx]').forEach(el => {
+    el.addEventListener('click', () => {
+      const show = localMatches[parseInt(el.dataset.localidx)];
+      sdrResults.classList.remove('visible'); sdrInput.value = '';
+      filterTerm = ''; render();
+      if (show) { setTab(show.status); setTimeout(() => openDetail(show.id), 50); }
+    });
+  });
+
+  // Click on TMDB result → add
+  sdrResults.querySelectorAll('[data-tmdbidx]').forEach(el => {
+    el.addEventListener('click', () => {
+      const r = newShows[parseInt(el.dataset.tmdbidx)];
+      sdrResults.classList.remove('visible'); sdrInput.value = ''; filterTerm = '';
+      if (r) addShow(r.id, r.name, r.poster_path||'', r.first_air_date||'', r.vote_average||0, r.overview||'');
+    });
+  });
+}
+
+// ── Mobile search sheet ───────────────────────────────────────────────────────
 async function doSearch() {
   const q = document.getElementById('show-search-input').value.trim();
   if (!q) return;
@@ -622,95 +692,85 @@ async function doSearch() {
   resultsEl.innerHTML = '<div style="text-align:center;padding:20px"><div class="spinner"></div></div>';
 
   if (TMDB_KEY === 'YOUR_TMDB_API_KEY_HERE') {
-    statusEl.textContent = '⚠️ Please add your TMDB API key first (see the yellow notice).';
-    statusEl.className = 'search-status error';
-    resultsEl.innerHTML = '';
-    return;
+    statusEl.textContent = '⚠️ Add your TMDB API key first.'; statusEl.className = 'search-status error';
+    resultsEl.innerHTML = ''; return;
   }
-
   try {
     const res = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=en-US`);
     const data = await res.json();
     const results = data.results?.slice(0,8) || [];
-    statusEl.textContent = results.length ? '' : 'No results found.';
-    statusEl.className = 'search-status';
-    if (!results.length) { resultsEl.innerHTML = '<div class="search-empty">No results found</div>'; return; }
-
-    // Store results in JS — never pass data through onclick strings
+    statusEl.textContent = ''; statusEl.className = 'search-status';
     window._searchResults = results;
+    const existingIds = new Set(shows.map(s=>s.id));
 
-    resultsEl.innerHTML = results.map((r, i) => `
-      <div class="result-card" data-idx="${i}">
-        <div class="result-poster">${r.poster_path ? `<img src="${TMDB_IMG}${r.poster_path}" alt="poster" onerror="this.style.display='none'"/>` : '<div style="width:100%;min-height:84px;display:flex;align-items:center;justify-content:center;color:#1e293b;font-size:24px">🎬</div>'}</div>
+    if (!results.length) { resultsEl.innerHTML = '<div class="search-empty">No results found</div>'; return; }
+    resultsEl.innerHTML = results.map((r,i) => {
+      const already = existingIds.has(r.id);
+      return `<div class="result-card" data-idx="${i}">
+        <div class="result-poster">${r.poster_path ? `<img src="${TMDB_IMG}${r.poster_path}" alt="poster" onerror="this.style.display='none'"/>` : '<div style="width:100%;height:100%;min-height:80px;display:flex;align-items:center;justify-content:center;color:#1a2d42;font-size:22px">🎬</div>'}</div>
         <div class="result-info">
           <div class="result-title">${r.name}</div>
           <div class="result-meta">${r.first_air_date?.slice(0,4)||'?'} · ⭐ ${r.vote_average?.toFixed(1)||'?'}</div>
           <div class="result-overview">${r.overview||''}</div>
         </div>
-      </div>`).join('');
+        <div class="result-add"><div class="result-add-btn ${already?'added':''}">${already?'✓':'+'}</div></div>
+      </div>`;
+    }).join('');
 
-    // Attach click listeners after rendering
     resultsEl.querySelectorAll('.result-card').forEach(card => {
       card.addEventListener('click', () => {
         const r = window._searchResults[parseInt(card.dataset.idx)];
         if (r) addShow(r.id, r.name, r.poster_path||'', r.first_air_date||'', r.vote_average||0, r.overview||'');
       });
     });
-
   } catch(e) {
-    statusEl.textContent = 'Search failed — check your API key or network.';
-    statusEl.className = 'search-status error';
+    statusEl.textContent = 'Search failed — check your API key.'; statusEl.className = 'search-status error';
     resultsEl.innerHTML = '';
   }
 }
 
+// ── Add show ──────────────────────────────────────────────────────────────────
 async function addShow(id, name, poster, firstAir, rating, overview) {
   closeSheet('search-sheet');
-  // Fetch real episode data
-  let seasonEpisodes = [], totalSeasons = 1, totalEpisodes = 0, genre = 'TV';
+  if (shows.find(s=>s.id===id)) { setTab('watching'); return; }
+
+  let seasonEpisodes=[], totalSeasons=1, totalEpisodes=0, genre='TV';
   try {
     const res = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_KEY}`);
     const d = await res.json();
-    totalSeasons = d.number_of_seasons || 1;
-    totalEpisodes = d.number_of_episodes || 0;
-    genre = d.genres?.[0]?.name || 'TV';
-    // fetch per-season counts
-    seasonEpisodes = (d.seasons||[]).filter(s=>s.season_number>0 && s.episode_count>0).sort((a,b)=>a.season_number-b.season_number).map(s=>s.episode_count);
+    totalSeasons = d.number_of_seasons||1;
+    totalEpisodes = d.number_of_episodes||0;
+    genre = d.genres?.[0]?.name||'TV';
+    seasonEpisodes = (d.seasons||[]).filter(s=>s.season_number>0&&s.episode_count>0).sort((a,b)=>a.season_number-b.season_number).map(s=>s.episode_count);
+    // Use actual released season count
+    totalSeasons = seasonEpisodes.length || totalSeasons;
     if (!totalEpisodes) totalEpisodes = seasonEpisodes.reduce((a,b)=>a+b,0);
   } catch {}
 
-  if (shows.find(s=>s.id===id)) { activeTab='watching'; render(); return; }
-
-  shows.unshift({
-    id, title: name, poster, year: firstAir?.slice(0,4),
-    rating, overview, genre, totalSeasons, totalEpisodes, seasonEpisodes,
-    status: 'watching', currentSeason: 1, currentEpisode: 1,
-  });
-  activeTab = 'watching';
-  save(); render();
+  shows.unshift({ id, title:name, poster, year:firstAir?.slice(0,4), rating, overview, genre, totalSeasons, totalEpisodes, seasonEpisodes, status:'watching', currentSeason:1, currentEpisode:1 });
+  setTab('watching'); save(); render();
 }
 
 // ── Detail sheet ──────────────────────────────────────────────────────────────
 function openDetail(id) {
   editingShow = shows.find(s=>s.id===id);
   if (!editingShow) return;
-  editStatus  = editingShow.status;
-  editSeason  = editingShow.currentSeason;
-  editEpisode = editingShow.currentEpisode;
-  renderDetail();
-  openSheet('detail-sheet');
+  editStatus=editingShow.status; editSeason=editingShow.currentSeason; editEpisode=editingShow.currentEpisode;
+  renderDetail(); openSheet('detail-sheet');
 }
 
 function renderDetail() {
-  const show = editingShow;
-  const cfg = STATUS[editStatus];
+  const show = editingShow, cfg = STATUS[editStatus];
+  const realMax = show.seasonEpisodes?.length || show.totalSeasons || 1;
+  const maxEp = show.seasonEpisodes?.[editSeason-1] || 99;
+  const showPicker = editStatus !== 'completed' && editStatus !== 'planning';
+  const we = watchedEps(show, editSeason, editEpisode);
+  const pp = show.totalEpisodes ? Math.min(100, we/show.totalEpisodes*100) : 0;
 
-  // Banner
-  const bannerEl = document.getElementById('detail-banner');
-  bannerEl.innerHTML = `
+  document.getElementById('detail-banner').innerHTML = `
     ${show.poster ? `<img class="banner-bg" src="${TMDB_IMG}${show.poster}" alt=""/>` : ''}
     <div class="banner-content">
-      <div class="banner-poster">${posterHTML(show.poster, show.title, 68)}</div>
+      <div class="banner-poster">${posterImg(show.poster, show.title)}</div>
       <div class="banner-info">
         <div class="banner-title">${show.title}</div>
         <div class="banner-sub">${show.year||''} · ${show.genre||''}</div>
@@ -719,28 +779,14 @@ function renderDetail() {
     </div>
     <button class="close-btn" onclick="closeSheet('detail-sheet')">✕</button>`;
 
-  // Body
-  const showPicker = editStatus !== 'completed' && editStatus !== 'planning';
-  const realMaxSeason = show.seasonEpisodes?.length || show.totalSeasons || 1;
-  const maxSeason  = realMaxSeason;
-  const maxEpisode = show.seasonEpisodes?.[editSeason-1] || 99;
-  const we = watchedEps(show, editSeason, editEpisode);
-  const pp = show.totalEpisodes ? Math.min(100, (we/show.totalEpisodes)*100) : 0;
-
-  let bodyHTML = `
+  document.getElementById('detail-body').innerHTML = `
     <div>
       <div class="section-label">Status</div>
       <div class="status-grid">
-        ${TABS.map(tab=>`
-          <button class="status-btn ${editStatus===tab.key?'active':''}"
-            style="${editStatus===tab.key?`background:${tab.color};border-color:${tab.color}`:''};"
-            onclick="setEditStatus('${tab.key}')">${tab.icon} ${tab.label}</button>
-        `).join('')}
+        ${TABS.map(tab=>`<button class="status-btn ${editStatus===tab.key?'active':''}" style="${editStatus===tab.key?`background:${tab.color};border-color:${tab.color}`:''}" onclick="setEditStatus('${tab.key}')">${tab.icon} ${tab.label}</button>`).join('')}
       </div>
-    </div>`;
-
-  if (showPicker) {
-    bodyHTML += `
+    </div>
+    ${showPicker ? `
     <div>
       <div class="section-label">Progress</div>
       <div class="picker-grid">
@@ -751,7 +797,7 @@ function renderDetail() {
             <div class="picker-val" id="pv-season">${editSeason}</div>
             <button class="picker-btn green" onclick="adjSeason(1)">+</button>
           </div>
-          <div class="picker-of" id="pv-seasonof">of ${realMaxSeason}</div>
+          <div class="picker-of" id="pv-seasonof">of ${realMax}</div>
         </div>
         <div class="picker-box">
           <div class="picker-label">Episode</div>
@@ -760,140 +806,83 @@ function renderDetail() {
             <div class="picker-val" id="pv-episode">${editEpisode}</div>
             <button class="picker-btn green" onclick="adjEpisode(1)">+</button>
           </div>
-          <div class="picker-of" id="pv-epof">${show.seasonEpisodes?.[editSeason-1] ? 'of '+show.seasonEpisodes[editSeason-1] : ''}</div>
+          <div class="picker-of" id="pv-epof">${maxEp !== 99 ? 'of '+maxEp : ''}</div>
         </div>
       </div>
-      ${show.totalEpisodes ? `
-      <div class="overall-box">
-        <div class="overall-row">
-          <span class="overall-label">Overall</span>
-          <span style="color:${cfg.color};font-size:11px">${we} / ${show.totalEpisodes} eps (${pp.toFixed(0)}%)</span>
-        </div>
+      ${show.totalEpisodes ? `<div class="overall-box">
+        <div class="overall-row"><span class="overall-label">Overall</span><span style="color:${cfg.color};font-size:11px">${we} / ${show.totalEpisodes} eps (${pp.toFixed(0)}%)</span></div>
         <div class="progress-bar"><div class="progress-fill" style="width:${pp}%;background:${cfg.color}"></div></div>
       </div>` : ''}
-    </div>`;
-  }
-
-  if (editStatus === 'completed') {
-    bodyHTML += `
-    <div class="completed-box">
-      <div class="completed-emoji">🎉</div>
-      <div class="completed-title">All done!</div>
-      <div class="completed-sub">${show.totalEpisodes||'?'} episodes · ${show.totalSeasons||'?'} seasons</div>
-    </div>`;
-  }
-
-  bodyHTML += `
+    </div>` : ''}
+    ${editStatus==='completed' ? `<div class="completed-box"><div class="completed-emoji">🎉</div><div class="completed-title">All done!</div><div class="completed-sub">${show.totalEpisodes||'?'} episodes · ${show.seasonEpisodes?.length||show.totalSeasons||'?'} seasons</div></div>` : ''}
     <div class="action-col">
       <button class="save-btn" onclick="saveDetail()">Save</button>
       <button class="remove-btn" onclick="removeShow(${show.id})">Remove Show</button>
     </div>`;
-
-  document.getElementById('detail-body').innerHTML = bodyHTML;
 }
 
 function setEditStatus(s) {
   editStatus = s;
-  if (s === 'completed') {
-    editSeason  = editingShow.totalSeasons || 1;
-    editEpisode = editingShow.seasonEpisodes?.[editingShow.totalSeasons-1] || editingShow.totalEpisodes || editingShow.currentEpisode;
-  }
-  if (s === 'planning') { editSeason = 1; editEpisode = 1; }
+  if (s==='completed') { editSeason=editingShow.seasonEpisodes?.length||editingShow.totalSeasons||1; editEpisode=editingShow.seasonEpisodes?.[editSeason-1]||editingShow.totalEpisodes||1; }
+  if (s==='planning') { editSeason=1; editEpisode=1; }
   renderDetail();
 }
-
 function adjSeason(d) {
-  const max = editingShow.seasonEpisodes?.length || editingShow.totalSeasons || 1;
+  const max = editingShow.seasonEpisodes?.length||editingShow.totalSeasons||1;
   editSeason = Math.max(1, Math.min(max, editSeason+d));
   editEpisode = 1;
-  const maxEp = editingShow.seasonEpisodes?.[editSeason-1] || 99;
-  const pvs = document.getElementById('pv-season');
-  const pve = document.getElementById('pv-episode');
-  const pvof = document.getElementById('pv-epof');
-  const pvsos = document.getElementById('pv-seasonof');
-  if (pvs) pvs.textContent = editSeason;
-  if (pve) pve.textContent = editEpisode;
-  if (pvof) pvof.textContent = maxEp ? 'of ' + maxEp : '';
-  if (pvsos) pvsos.textContent = 'of ' + max;
+  const maxEp = editingShow.seasonEpisodes?.[editSeason-1]||99;
+  document.getElementById('pv-season').textContent = editSeason;
+  document.getElementById('pv-episode').textContent = editEpisode;
+  document.getElementById('pv-epof').textContent = maxEp!==99 ? 'of '+maxEp : '';
+  document.getElementById('pv-seasonof').textContent = 'of '+max;
   updateOverall();
 }
-
 function adjEpisode(d) {
-  const maxEp = editingShow.seasonEpisodes?.[editSeason-1] || 99;
+  const maxEp = editingShow.seasonEpisodes?.[editSeason-1]||99;
   editEpisode = Math.max(1, Math.min(maxEp, editEpisode+d));
-  const pve = document.getElementById('pv-episode');
-  if (pve) pve.textContent = editEpisode;
+  document.getElementById('pv-episode').textContent = editEpisode;
   updateOverall();
 }
-
 function updateOverall() {
-  const show = editingShow;
-  if (!show.totalEpisodes) return;
-  const we = watchedEps(show, editSeason, editEpisode);
-  const pp = Math.min(100, (we/show.totalEpisodes)*100);
-  const cfg = STATUS[editStatus];
-  const overall = document.querySelector('.overall-box');
-  if (overall) overall.innerHTML = `
-    <div class="overall-row">
-      <span class="overall-label">Overall</span>
-      <span style="color:${cfg.color};font-size:11px">${we} / ${show.totalEpisodes} eps (${pp.toFixed(0)}%)</span>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" style="width:${pp}%;background:${cfg.color}"></div></div>`;
+  const show=editingShow; if (!show.totalEpisodes) return;
+  const we=watchedEps(show,editSeason,editEpisode), pp=Math.min(100,we/show.totalEpisodes*100);
+  const cfg=STATUS[editStatus], box=document.querySelector('.overall-box');
+  if(box) box.innerHTML=`<div class="overall-row"><span class="overall-label">Overall</span><span style="color:${cfg.color};font-size:11px">${we} / ${show.totalEpisodes} eps (${pp.toFixed(0)}%)</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pp}%;background:${cfg.color}"></div></div>`;
 }
-
 function saveDetail() {
-  const idx = shows.findIndex(s=>s.id===editingShow.id);
-  if (idx === -1) return;
-  shows[idx] = { ...shows[idx], status: editStatus, currentSeason: editSeason, currentEpisode: editEpisode };
-  activeTab = editStatus;
-  save(); closeSheet('detail-sheet'); render();
+  const idx=shows.findIndex(s=>s.id===editingShow.id); if(idx===-1) return;
+  shows[idx]={...shows[idx],status:editStatus,currentSeason:editSeason,currentEpisode:editEpisode};
+  activeTab=editStatus; save(); closeSheet('detail-sheet'); render();
 }
-
 function removeShow(id) {
-  if (!confirm(`Remove "${editingShow.title}"?`)) return;
-  shows = shows.filter(s=>s.id!==id);
-  save(); closeSheet('detail-sheet'); render();
+  if(!confirm(`Remove "${editingShow.title}"?`)) return;
+  shows=shows.filter(s=>s.id!==id); save(); closeSheet('detail-sheet'); render();
 }
 
-// ── Sheet helpers ─────────────────────────────────────────────────────────────
-function openSheet(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+// ── Sheets ────────────────────────────────────────────────────────────────────
+function openSheet(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
 function closeSheet(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.sheet-backdrop').forEach(el => el.addEventListener('click', e => { if(e.target===el) closeSheet(el.id); }));
 
-// Close on backdrop click
-document.querySelectorAll('.sheet-backdrop').forEach(el => {
-  el.addEventListener('click', e => { if (e.target===el) closeSheet(el.id); });
-});
+// ── Wire up mobile controls ───────────────────────────────────────────────────
+function setTab(key) { activeTab=key; render(); }
 
-// ── Tab / filter ──────────────────────────────────────────────────────────────
-function setTab(key) { activeTab = key; render(); }
-
-document.getElementById('search-input').addEventListener('input', e => {
-  filterTerm = e.target.value.toLowerCase();
-  const mob = document.getElementById('search-input-mobile');
-  if (mob) mob.value = e.target.value;
-  render();
-});
-
-// ── Wire up buttons ───────────────────────────────────────────────────────────
-document.getElementById('add-btn').addEventListener('click', () => {
-  document.getElementById('show-search-input').value = '';
-  document.getElementById('search-status').textContent = '';
-  document.getElementById('search-results').innerHTML = '<div class="search-empty">Search above to find a show</div>';
+document.getElementById('mobile-add-btn')?.addEventListener('click', () => {
+  document.getElementById('show-search-input').value='';
+  document.getElementById('search-status').textContent='';
+  document.getElementById('search-results').innerHTML='<div class="search-empty">Search above to find a show</div>';
   openSheet('search-sheet');
-  setTimeout(()=>document.getElementById('show-search-input').focus(), 300);
+  setTimeout(()=>document.getElementById('show-search-input').focus(),300);
 });
-
-document.getElementById('go-btn').addEventListener('click', doSearch);
-document.getElementById('show-search-input').addEventListener('keydown', e => { if (e.key==='Enter') doSearch(); });
+document.getElementById('mobile-search')?.addEventListener('input', e => { filterTerm=e.target.value.toLowerCase(); render(); });
+document.getElementById('go-btn')?.addEventListener('click', doSearch);
+document.getElementById('show-search-input')?.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 load(); render();
-</script>
 
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js"));
-}
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/watchlist/sw.js'));
 </script>
 </body>
 </html>
