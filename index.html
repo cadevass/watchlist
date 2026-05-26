@@ -675,7 +675,7 @@ async function addShow(id, name, poster, firstAir, rating, overview) {
     totalEpisodes = d.number_of_episodes || 0;
     genre = d.genres?.[0]?.name || 'TV';
     // fetch per-season counts
-    seasonEpisodes = (d.seasons||[]).filter(s=>s.season_number>0).sort((a,b)=>a.season_number-b.season_number).map(s=>s.episode_count);
+    seasonEpisodes = (d.seasons||[]).filter(s=>s.season_number>0 && s.episode_count>0).sort((a,b)=>a.season_number-b.season_number).map(s=>s.episode_count);
     if (!totalEpisodes) totalEpisodes = seasonEpisodes.reduce((a,b)=>a+b,0);
   } catch {}
 
@@ -721,7 +721,8 @@ function renderDetail() {
 
   // Body
   const showPicker = editStatus !== 'completed' && editStatus !== 'planning';
-  const maxSeason  = show.totalSeasons || 1;
+  const realMaxSeason = show.seasonEpisodes?.length || show.totalSeasons || 1;
+  const maxSeason  = realMaxSeason;
   const maxEpisode = show.seasonEpisodes?.[editSeason-1] || 99;
   const we = watchedEps(show, editSeason, editEpisode);
   const pp = show.totalEpisodes ? Math.min(100, (we/show.totalEpisodes)*100) : 0;
@@ -750,7 +751,7 @@ function renderDetail() {
             <div class="picker-val" id="pv-season">${editSeason}</div>
             <button class="picker-btn green" onclick="adjSeason(1)">+</button>
           </div>
-          <div class="picker-of">of ${maxSeason}</div>
+          <div class="picker-of" id="pv-seasonof">of ${realMaxSeason}</div>
         </div>
         <div class="picker-box">
           <div class="picker-label">Episode</div>
@@ -759,7 +760,7 @@ function renderDetail() {
             <div class="picker-val" id="pv-episode">${editEpisode}</div>
             <button class="picker-btn green" onclick="adjEpisode(1)">+</button>
           </div>
-          <div class="picker-of">${show.seasonEpisodes?.[editSeason-1] ? 'of '+show.seasonEpisodes[editSeason-1] : ''}</div>
+          <div class="picker-of" id="pv-epof">${show.seasonEpisodes?.[editSeason-1] ? 'of '+show.seasonEpisodes[editSeason-1] : ''}</div>
         </div>
       </div>
       ${show.totalEpisodes ? `
@@ -802,16 +803,18 @@ function setEditStatus(s) {
 }
 
 function adjSeason(d) {
-  const max = editingShow.totalSeasons || 1;
+  const max = editingShow.seasonEpisodes?.length || editingShow.totalSeasons || 1;
   editSeason = Math.max(1, Math.min(max, editSeason+d));
   editEpisode = 1;
-  // cap episode
   const maxEp = editingShow.seasonEpisodes?.[editSeason-1] || 99;
-  if (editEpisode > maxEp) editEpisode = maxEp;
   const pvs = document.getElementById('pv-season');
   const pve = document.getElementById('pv-episode');
+  const pvof = document.getElementById('pv-epof');
+  const pvsos = document.getElementById('pv-seasonof');
   if (pvs) pvs.textContent = editSeason;
   if (pve) pve.textContent = editEpisode;
+  if (pvof) pvof.textContent = maxEp ? 'of ' + maxEp : '';
+  if (pvsos) pvsos.textContent = 'of ' + max;
   updateOverall();
 }
 
